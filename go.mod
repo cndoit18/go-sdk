@@ -1,10 +1,9 @@
 module github.com/open-feature/go-sdk
 
-go 1.19
+go 1.21
 
 require (
 	github.com/cucumber/godog v0.14.0
-	github.com/go-logr/logr v1.4.1
 	github.com/golang/mock v1.6.0
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3
 	golang.org/x/text v0.14.0

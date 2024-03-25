@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/go-logr/logr"
+	"log/slog"
+
 	"github.com/open-feature/go-sdk/openfeature/internal"
 	"golang.org/x/exp/maps"
 )
@@ -16,15 +17,14 @@ type evaluationAPI struct {
 	namedProviders  map[string]FeatureProvider
 	hks             []Hook
 	apiCtx          EvaluationContext
-	logger          logr.Logger
+	logger          *slog.Logger
 	mu              sync.RWMutex
 	eventExecutor   *eventExecutor
 }
 
 // newEvaluationAPI is a helper to generate an API. Used internally
 func newEvaluationAPI() evaluationAPI {
-	logger := logr.New(internal.Logger{})
-
+	logger := slog.New(internal.Logger{})
 	return evaluationAPI{
 		defaultProvider: NoopProvider{},
 		namedProviders:  map[string]FeatureProvider{},
@@ -112,7 +112,7 @@ func (api *evaluationAPI) setEvaluationContext(apiCtx EvaluationContext) {
 	api.apiCtx = apiCtx
 }
 
-func (api *evaluationAPI) setLogger(l logr.Logger) {
+func (api *evaluationAPI) setLogger(l *slog.Logger) {
 	api.mu.Lock()
 	defer api.mu.Unlock()
 
@@ -120,7 +120,7 @@ func (api *evaluationAPI) setLogger(l logr.Logger) {
 	api.eventExecutor.updateLogger(l)
 }
 
-func (api *evaluationAPI) getLogger() logr.Logger {
+func (api *evaluationAPI) getLogger() *slog.Logger {
 	api.mu.RLock()
 	defer api.mu.RUnlock()
 

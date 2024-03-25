@@ -2,19 +2,19 @@ package openfeature
 
 import (
 	"errors"
+	"log/slog"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/open-feature/go-sdk/openfeature/internal"
 	"golang.org/x/exp/slices"
 )
 
-var logger logr.Logger
+var logger *slog.Logger
 
 func init() {
-	logger = logr.New(internal.Logger{})
+	logger = slog.New(internal.Logger{})
 }
 
 // Requirement 5.1.1 The provider MAY define a mechanism for signaling the occurrence of one of a set of events,

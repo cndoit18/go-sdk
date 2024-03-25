@@ -1,7 +1,7 @@
 package openfeature
 
 import (
-	"github.com/go-logr/logr"
+	"log/slog"
 )
 
 // api is the global evaluationAPI. This is a singleton and there can only be one instance.
@@ -47,7 +47,7 @@ func SetEvaluationContext(evalCtx EvaluationContext) {
 }
 
 // SetLogger sets the global Logger.
-func SetLogger(l logr.Logger) {
+func SetLogger(l *slog.Logger) {
 	api.setLogger(l)
 }
 
@@ -116,7 +116,7 @@ func getHooks() []Hook {
 }
 
 // globalLogger return the global logger set at the API
-func globalLogger() logr.Logger {
+func globalLogger() *slog.Logger {
 	return api.getLogger()
 }
 

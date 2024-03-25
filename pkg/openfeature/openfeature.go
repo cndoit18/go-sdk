@@ -1,7 +1,8 @@
 package openfeature
 
 import (
-	"github.com/go-logr/logr"
+	"log/slog"
+
 	"github.com/open-feature/go-sdk/openfeature"
 )
 
@@ -36,7 +37,7 @@ func SetEvaluationContext(evalCtx EvaluationContext) {
 //
 // Deprecated: use github.com/open-feature/go-sdk/openfeature.SetLogger,
 // instead.
-func SetLogger(l logr.Logger) {
+func SetLogger(l *slog.Logger) {
 	openfeature.SetLogger(l)
 }
 

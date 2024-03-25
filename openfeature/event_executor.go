@@ -6,7 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-logr/logr"
+	"log/slog"
+
 	"golang.org/x/exp/maps"
 )
 
@@ -22,13 +23,13 @@ type eventExecutor struct {
 	activeSubscriptions      []providerReference
 	apiRegistry              map[EventType][]EventCallback
 	scopedRegistry           map[string]scopedCallback
-	logger                   logr.Logger
+	logger                   *slog.Logger
 	eventChan                chan eventPayload
 	once                     sync.Once
 	mu                       sync.Mutex
 }
 
-func newEventExecutor(logger logr.Logger) *eventExecutor {
+func newEventExecutor(logger *slog.Logger) *eventExecutor {
 	executor := eventExecutor{
 		namedProviderReference: map[string]providerReference{},
 		activeSubscriptions:    []providerReference{},
@@ -69,7 +70,7 @@ type providerReference struct {
 }
 
 // updateLogger updates the executor's logger
-func (e *eventExecutor) updateLogger(l logr.Logger) {
+func (e *eventExecutor) updateLogger(l *slog.Logger) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 

@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 	"unicode/utf8"
-
-	"github.com/go-logr/logr"
 )
 
 // IClient defines the behaviour required of an openfeature client
@@ -54,7 +53,7 @@ type Client struct {
 	metadata          ClientMetadata
 	hooks             []Hook
 	evaluationContext EvaluationContext
-	logger            func() logr.Logger
+	logger            func() *slog.Logger
 }
 
 // NewClient returns a new Client. Name is a unique identifier for this client
@@ -68,10 +67,10 @@ func NewClient(name string) *Client {
 }
 
 // WithLogger sets the logger of the client
-func (c *Client) WithLogger(l logr.Logger) *Client {
+func (c *Client) WithLogger(l *slog.Logger) *Client {
 	c.mx.Lock()
 	defer c.mx.Unlock()
-	c.logger = func() logr.Logger { return l }
+	c.logger = func() *slog.Logger { return l }
 	return c
 }
 
@@ -397,8 +396,9 @@ func (c *Client) BooleanValueDetails(ctx context.Context, flag string, defaultVa
 	if !ok {
 		err := errors.New("evaluated value is not a boolean")
 		c.logger().Error(
-			err, "invalid flag resolution type", "expectedType", "boolean",
+			"invalid flag resolution type", "expectedType", "boolean",
 			"gotType", fmt.Sprintf("%T", evalDetails.Value),
+			"err", err,
 		)
 		boolEvalDetails := BooleanEvaluationDetails{
 			Value:             defaultValue,
@@ -445,8 +445,9 @@ func (c *Client) StringValueDetails(ctx context.Context, flag string, defaultVal
 	if !ok {
 		err := errors.New("evaluated value is not a string")
 		c.logger().Error(
-			err, "invalid flag resolution type", "expectedType", "string",
+			"invalid flag resolution type", "expectedType", "string",
 			"gotType", fmt.Sprintf("%T", evalDetails.Value),
+			"err", err,
 		)
 		strEvalDetails := StringEvaluationDetails{
 			Value:             defaultValue,
@@ -493,8 +494,9 @@ func (c *Client) FloatValueDetails(ctx context.Context, flag string, defaultValu
 	if !ok {
 		err := errors.New("evaluated value is not a float64")
 		c.logger().Error(
-			err, "invalid flag resolution type", "expectedType", "float64",
+			"invalid flag resolution type", "expectedType", "float64",
 			"gotType", fmt.Sprintf("%T", evalDetails.Value),
+			"err", err,
 		)
 		floatEvalDetails := FloatEvaluationDetails{
 			Value:             defaultValue,
@@ -541,8 +543,9 @@ func (c *Client) IntValueDetails(ctx context.Context, flag string, defaultValue 
 	if !ok {
 		err := errors.New("evaluated value is not an int64")
 		c.logger().Error(
-			err, "invalid flag resolution type", "expectedType", "int64",
+			"invalid flag resolution type", "expectedType", "int64",
 			"gotType", fmt.Sprintf("%T", evalDetails.Value),
+			"err", err,
 		)
 		intEvalDetails := IntEvaluationDetails{
 			Value:             defaultValue,
@@ -620,8 +623,9 @@ func (c *Client) evaluate(
 	hookCtx.evaluationContext = evalCtx
 	if err != nil {
 		c.logger().Error(
-			err, "before hook", "flag", flag, "defaultValue", defaultValue,
+			"before hook", "flag", flag, "defaultValue", defaultValue,
 			"evaluationContext", evalCtx, "evaluationOptions", options, "type", flagType.String(),
+			"err", err,
 		)
 		err = fmt.Errorf("before hook: %w", err)
 		c.errorHooks(ctx, hookCtx, providerInvocationClientApiHooks, err, options)
@@ -658,9 +662,10 @@ func (c *Client) evaluate(
 	err = resolution.Error()
 	if err != nil {
 		c.logger().Error(
-			err, "flag resolution", "flag", flag, "defaultValue", defaultValue,
+			"flag resolution", "flag", flag, "defaultValue", defaultValue,
 			"evaluationContext", evalCtx, "evaluationOptions", options, "type", flagType.String(), "errorCode", err,
 			"errMessage", resolution.ResolutionError.message,
+			"err", err,
 		)
 		err = fmt.Errorf("error code: %w", err)
 		c.errorHooks(ctx, hookCtx, providerInvocationClientApiHooks, err, options)
@@ -673,8 +678,9 @@ func (c *Client) evaluate(
 
 	if err := c.afterHooks(ctx, hookCtx, providerInvocationClientApiHooks, evalDetails, options); err != nil {
 		c.logger().Error(
-			err, "after hook", "flag", flag, "defaultValue", defaultValue,
+			"after hook", "flag", flag, "defaultValue", defaultValue,
 			"evaluationContext", evalCtx, "evaluationOptions", options, "type", flagType.String(),
+			"err", err,
 		)
 		err = fmt.Errorf("after hook: %w", err)
 		c.errorHooks(ctx, hookCtx, providerInvocationClientApiHooks, err, options)

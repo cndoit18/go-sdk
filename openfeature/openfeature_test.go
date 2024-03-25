@@ -2,13 +2,12 @@ package openfeature
 
 import (
 	"errors"
+	"log/slog"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/golang/mock/gomock"
-
 	"github.com/open-feature/go-sdk/openfeature/internal"
 )
 
@@ -687,9 +686,9 @@ func TestLoggerOverride(t *testing.T) {
 	defer t.Cleanup(initSingleton)
 
 	newOverride := internal.Logger{}
-	SetLogger(logr.New(newOverride))
+	SetLogger(slog.New(newOverride))
 
-	if !reflect.DeepEqual(globalLogger().GetSink(), newOverride) {
+	if !reflect.DeepEqual(globalLogger().Handler(), newOverride) {
 		t.Error("logger overriding failed")
 	}
 }
